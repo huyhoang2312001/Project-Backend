@@ -1,39 +1,35 @@
 package com.myproject.employer.api.controller;
 
-import com.myproject.employer.api.dto.in.employer.EmployerDtoIn;
 import com.myproject.employer.api.dto.in.PageDtoIn;
-import com.myproject.employer.api.dto.in.employer.UpdateEmployerDtoIn;
-import com.myproject.employer.api.dto.out.employer.EmployerDtoOut;
+import com.myproject.employer.api.dto.in.resume.ResumeDtoIn;
+import com.myproject.employer.api.dto.in.resume.UpdateResumeDtoIn;
 import com.myproject.employer.api.dto.out.PageDtoOut;
-import com.myproject.employer.api.service.employer.EmployerService;
+import com.myproject.employer.api.dto.out.resume.ResumeDtoOut;
+import com.myproject.employer.api.service.resume.ResumeService;
 import com.myproject.employer.common.controller.AbstractResponseController;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-
 
 import java.util.HashMap;
 
 @RestController
-@RequestMapping(value = "/employer", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Employer", description = "Quản lý Employer")
-public class EmployerController extends AbstractResponseController {
-
-    private final EmployerService employerService;
-
+@RequestMapping(value = "/resume", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Resume", description = "Quản lý resume")
+public class ResumeController extends AbstractResponseController {
+    private final ResumeService resumeService;
     @Autowired
-    public EmployerController(EmployerService employerService) {
-        this.employerService = employerService;
-    }
 
+    public ResumeController(ResumeService resumeService) {
+        this.resumeService = resumeService;
+    }
     @Operation(
             summary = "Thêm mới employer",
             responses = {
@@ -42,7 +38,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = ResumeController.ResponseResume.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -56,13 +52,11 @@ public class EmployerController extends AbstractResponseController {
             }
     )
     @PostMapping(value = "")
-    public ResponseEntity<?> create(@RequestBody @Valid EmployerDtoIn employerDtoIn){
-
+    public ResponseEntity<?> create(@RequestBody @Valid ResumeDtoIn resumeDtoIn) {
         return responseEntity(() -> {
-            return this.employerService.create(employerDtoIn);
-        }, HttpStatus.CREATED);
-}
-
+            return this.resumeService.create(resumeDtoIn);
+        });
+    }
     @Operation(
             summary = "Chỉnh sửa employer",
             responses = {
@@ -71,7 +65,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = ResumeController.ResponseResume.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -84,15 +78,12 @@ public class EmployerController extends AbstractResponseController {
                     )
             }
     )
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<?> update(@PathVariable(value = "id")Long id,@RequestBody  @Valid  UpdateEmployerDtoIn updateEmployerDtoIn){
+    @PutMapping(value = "{/id}")
+    public ResponseEntity<?> update(@PathVariable(value = "id") Long id, UpdateResumeDtoIn updateResumeDtoIn) {
         return responseEntity(() -> {
-            return this.employerService.update(id, updateEmployerDtoIn);
-        } );
-
-
+            return  this.resumeService.update(id, updateResumeDtoIn);
+        });
     }
-
     @Operation(
             summary = "Lấy thông tin 1 employer theo id",
             responses = {
@@ -101,7 +92,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = ResumeController.ResponseResume.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -111,14 +102,12 @@ public class EmployerController extends AbstractResponseController {
 
             }
     )
-    @GetMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
+    @GetMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
     public ResponseEntity<?> get(@PathVariable(value = "id") Long id) {
         return responseEntity(() -> {
-            return this.employerService.get(id);
+            return this.resumeService.get(id);
         });
     }
-
-
     @Operation(
             summary = "Lấy danh sách employer",
             responses = {
@@ -126,7 +115,7 @@ public class EmployerController extends AbstractResponseController {
                             responseCode = "200",
                             content = @Content(
                                     schema = @Schema(
-                                            implementation = ResponsePageEmployer.class
+                                            implementation = ResumeController.ResponsePageResume.class
                                     )
                             )
                     ), @ApiResponse(
@@ -140,10 +129,11 @@ public class EmployerController extends AbstractResponseController {
             }
     )
     @GetMapping(value = "", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> list(@RequestBody @Valid PageDtoIn pageDtoIn) {
+    public ResponseEntity<?> list( @RequestBody @Valid PageDtoIn pageDtoIn) {
         return responseEntity(() -> {
-            return this.employerService.list(pageDtoIn);
+            return this.resumeService.list(pageDtoIn);
         });
+
     }
     @Operation(
             summary = "Xóa employer",
@@ -163,23 +153,18 @@ public class EmployerController extends AbstractResponseController {
 
             }
     )
-    @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> delete(@PathVariable (value = "id") Long id) {
         return responseEntity(() -> {
-            this.employerService.delete(id);
+            this.resumeService.delete(id);
             return new HashMap<>();
         });
     }
 
-private static class ResponseEmployer extends com.myproject.employer.common.response.ApiResponse<EmployerDtoOut>{
+    private static class ResponseResume extends com.myproject.employer.common.response.ApiResponse<ResumeDtoOut>{
 
+    }
+    private static class ResponsePageResume extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<ResumeController>>{
+
+    }
 }
-private static class ResponsePageEmployer extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<EmployerDtoOut>>{
-
-}
-
-}
-
-
-
-

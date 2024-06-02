@@ -1,12 +1,13 @@
 package com.myproject.employer.api.controller;
 
-import com.myproject.employer.api.dto.in.employer.EmployerDtoIn;
 import com.myproject.employer.api.dto.in.PageDtoIn;
-import com.myproject.employer.api.dto.in.employer.UpdateEmployerDtoIn;
-import com.myproject.employer.api.dto.out.employer.EmployerDtoOut;
+import com.myproject.employer.api.dto.in.job.JobDtoIn;
+import com.myproject.employer.api.dto.in.job.UpdateJobDtoIn;
 import com.myproject.employer.api.dto.out.PageDtoOut;
-import com.myproject.employer.api.service.employer.EmployerService;
+import com.myproject.employer.api.dto.out.job.JobDtoOut;
+import com.myproject.employer.api.service.job.JobService;
 import com.myproject.employer.common.controller.AbstractResponseController;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,37 +18,35 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-
 
 import java.util.HashMap;
 
 @RestController
-@RequestMapping(value = "/employer", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Employer", description = "Quản lý Employer")
-public class EmployerController extends AbstractResponseController {
+@RequestMapping(value = "/job", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "job", description = "Quản lý Job")
+public class JobController extends AbstractResponseController {
 
-    private final EmployerService employerService;
+
+    private JobService jobService;
 
     @Autowired
-    public EmployerController(EmployerService employerService) {
-        this.employerService = employerService;
-    }
 
+    public JobController(JobService jobService) {
+        this.jobService = jobService;
+    }
     @Operation(
-            summary = "Thêm mới employer",
+            summary = "Thêm mới job",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
-                                    )
+                                            implementation = ResponseJob.class)
                             )}
                     ), @ApiResponse(
                     responseCode = "400",
-                    description = "Lỗi: email đã tồn tại hoặc provinceId không tồn tại"
+                    description = "Lỗi: employer_id đã tồn tại hoặc employer_id không tồn tại"
             ),
                     @ApiResponse(
                             responseCode = "500",
@@ -56,27 +55,25 @@ public class EmployerController extends AbstractResponseController {
             }
     )
     @PostMapping(value = "")
-    public ResponseEntity<?> create(@RequestBody @Valid EmployerDtoIn employerDtoIn){
-
+    public ResponseEntity<?> create(@RequestBody @Valid JobDtoIn jobDtoIn){
         return responseEntity(() -> {
-            return this.employerService.create(employerDtoIn);
+            return this.jobService.create(jobDtoIn);
         }, HttpStatus.CREATED);
-}
 
+    }
     @Operation(
-            summary = "Chỉnh sửa employer",
+            summary = "Lấy thông tin theo id",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
-                                    )
+                                            implementation = ResponseJob.class)
                             )}
                     ), @ApiResponse(
                     responseCode = "400",
-                    description = "Lỗi: id không tồn tại"
+                    description = "Lỗi: employer_id đã tồn tại hoặc employer_id không tồn tại"
             ),
                     @ApiResponse(
                             responseCode = "500",
@@ -84,41 +81,40 @@ public class EmployerController extends AbstractResponseController {
                     )
             }
     )
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<?> update(@PathVariable(value = "id")Long id,@RequestBody  @Valid  UpdateEmployerDtoIn updateEmployerDtoIn){
+    @GetMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> get(@PathVariable (value = "id") Long id) {
         return responseEntity(() -> {
-            return this.employerService.update(id, updateEmployerDtoIn);
-        } );
-
+            return this.jobService.get(id);
+                });
 
     }
-
     @Operation(
-            summary = "Lấy thông tin 1 employer theo id",
+            summary = "Thêm mới job",
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
-                                    )
+                                            implementation = ResponseJob.class)
                             )}
                     ), @ApiResponse(
                     responseCode = "400",
-                    description = "Lỗi: id không tồn tại"
+                    description = "Lỗi: employer_id đã tồn tại hoặc employer_id không tồn tại"
             ),
-
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Lỗi: có lỗi xảy ra trong quá trình thêm mới employer"
+                    )
             }
     )
-    @GetMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> get(@PathVariable(value = "id") Long id) {
+    @PutMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> update(@PathVariable(value = "id") Long id, @RequestBody @Valid UpdateJobDtoIn updateJobDtoIn){
         return responseEntity(() -> {
-            return this.employerService.get(id);
-        });
+            return this.jobService.update(id, updateJobDtoIn);
+                }
+                );
     }
-
-
     @Operation(
             summary = "Lấy danh sách employer",
             responses = {
@@ -126,7 +122,7 @@ public class EmployerController extends AbstractResponseController {
                             responseCode = "200",
                             content = @Content(
                                     schema = @Schema(
-                                            implementation = ResponsePageEmployer.class
+                                            implementation = JobController.ResponsePageJob.class
                                     )
                             )
                     ), @ApiResponse(
@@ -140,9 +136,9 @@ public class EmployerController extends AbstractResponseController {
             }
     )
     @GetMapping(value = "", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> list(@RequestBody @Valid PageDtoIn pageDtoIn) {
+    public ResponseEntity<?> list(@RequestBody  @Valid PageDtoIn pageDtoIn){
         return responseEntity(() -> {
-            return this.employerService.list(pageDtoIn);
+            return  this.jobService.list(pageDtoIn);
         });
     }
     @Operation(
@@ -163,23 +159,19 @@ public class EmployerController extends AbstractResponseController {
 
             }
     )
-    @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
+    @DeleteMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
     public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
         return responseEntity(() -> {
-            this.employerService.delete(id);
-            return new HashMap<>();
+            this.jobService.delete(id);
+            return new HashMap();
         });
     }
 
-private static class ResponseEmployer extends com.myproject.employer.common.response.ApiResponse<EmployerDtoOut>{
 
+    private static class ResponseJob extends com.myproject.employer.common.response.ApiResponse<JobDtoOut>{
+
+    }
+    private static class ResponsePageJob extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<JobDtoOut>>{
+
+    }
 }
-private static class ResponsePageEmployer extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<EmployerDtoOut>>{
-
-}
-
-}
-
-
-
-

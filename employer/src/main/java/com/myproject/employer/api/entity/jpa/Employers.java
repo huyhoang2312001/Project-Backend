@@ -29,7 +29,7 @@ public class Employers implements Serializable {
     private String name;
 
     @Column(name = "province")
-    private int province;
+    private Integer province;
 
     @Column(name = "description")
     private String description;

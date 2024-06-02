@@ -1,12 +1,14 @@
 package com.myproject.employer.api.controller;
 
-import com.myproject.employer.api.dto.in.employer.EmployerDtoIn;
 import com.myproject.employer.api.dto.in.PageDtoIn;
-import com.myproject.employer.api.dto.in.employer.UpdateEmployerDtoIn;
-import com.myproject.employer.api.dto.out.employer.EmployerDtoOut;
+import com.myproject.employer.api.dto.in.seeker.SeekerDtoIn;
+import com.myproject.employer.api.dto.in.seeker.UpdateSeekerDtoIn;
 import com.myproject.employer.api.dto.out.PageDtoOut;
-import com.myproject.employer.api.service.employer.EmployerService;
+import com.myproject.employer.api.dto.out.seeker.SeekerDtoOut;
+import com.myproject.employer.api.service.seeker.SeekerService;
+import com.myproject.employer.api.service.seeker.SeekerServiceImpl;
 import com.myproject.employer.common.controller.AbstractResponseController;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,23 +19,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-
 
 import java.util.HashMap;
 
 @RestController
-@RequestMapping(value = "/employer", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Employer", description = "Quản lý Employer")
-public class EmployerController extends AbstractResponseController {
-
-    private final EmployerService employerService;
-
+@RequestMapping(value = "/seeker", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "Seeker", description = "Quản lý Seeker")
+public class SeekerController extends AbstractResponseController {
+    private final SeekerService seekerService;
     @Autowired
-    public EmployerController(EmployerService employerService) {
-        this.employerService = employerService;
-    }
 
+    public SeekerController(SeekerService seekerService) {
+        this.seekerService = seekerService;
+    }
     @Operation(
             summary = "Thêm mới employer",
             responses = {
@@ -42,7 +40,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = SeekerController.ResponseSeeker.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -56,13 +54,11 @@ public class EmployerController extends AbstractResponseController {
             }
     )
     @PostMapping(value = "")
-    public ResponseEntity<?> create(@RequestBody @Valid EmployerDtoIn employerDtoIn){
-
+    public ResponseEntity<?> create(@RequestBody @Valid SeekerDtoIn seekerDtoIn){
         return responseEntity(() -> {
-            return this.employerService.create(employerDtoIn);
+            return this.seekerService.create(seekerDtoIn);
         }, HttpStatus.CREATED);
-}
-
+    }
     @Operation(
             summary = "Chỉnh sửa employer",
             responses = {
@@ -71,7 +67,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = SeekerController.ResponseSeeker.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -84,15 +80,12 @@ public class EmployerController extends AbstractResponseController {
                     )
             }
     )
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<?> update(@PathVariable(value = "id")Long id,@RequestBody  @Valid  UpdateEmployerDtoIn updateEmployerDtoIn){
+    @PutMapping(value = "{/id}")
+    public ResponseEntity<?> update(@PathVariable (value = "id") Long id, @RequestBody @Valid UpdateSeekerDtoIn updateSeekerDtoIn){
         return responseEntity(() -> {
-            return this.employerService.update(id, updateEmployerDtoIn);
-        } );
-
-
+            return this.seekerService.update(id, updateSeekerDtoIn);
+        });
     }
-
     @Operation(
             summary = "Lấy thông tin 1 employer theo id",
             responses = {
@@ -101,7 +94,7 @@ public class EmployerController extends AbstractResponseController {
                             content = {@Content(
                                     mediaType = "application/json",
                                     schema = @Schema(
-                                            implementation = ResponseEmployer.class
+                                            implementation = SeekerController.ResponseSeeker.class
                                     )
                             )}
                     ), @ApiResponse(
@@ -111,14 +104,12 @@ public class EmployerController extends AbstractResponseController {
 
             }
     )
-    @GetMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> get(@PathVariable(value = "id") Long id) {
+    @GetMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> get(@PathVariable (value = "id") Long id) {
         return responseEntity(() -> {
-            return this.employerService.get(id);
-        });
+            return this.seekerService.get(id);
+        }) ;
     }
-
-
     @Operation(
             summary = "Lấy danh sách employer",
             responses = {
@@ -126,7 +117,7 @@ public class EmployerController extends AbstractResponseController {
                             responseCode = "200",
                             content = @Content(
                                     schema = @Schema(
-                                            implementation = ResponsePageEmployer.class
+                                            implementation = SeekerController.ResponsePageSeeker.class
                                     )
                             )
                     ), @ApiResponse(
@@ -139,10 +130,10 @@ public class EmployerController extends AbstractResponseController {
                     )
             }
     )
-    @GetMapping(value = "", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> list(@RequestBody @Valid PageDtoIn pageDtoIn) {
+    @GetMapping(value = "{/id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> list(@PathVariable (value = "id") Long id, @RequestBody @Valid PageDtoIn pageDtoIn) {
         return responseEntity(() -> {
-            return this.employerService.list(pageDtoIn);
+            return this.seekerService.list(pageDtoIn);
         });
     }
     @Operation(
@@ -163,23 +154,18 @@ public class EmployerController extends AbstractResponseController {
 
             }
     )
-    @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
+    @DeleteMapping(value = "id", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<?> delete(@PathVariable (value = "id") Long id) {
         return responseEntity(() -> {
-            this.employerService.delete(id);
+            this.seekerService.delete(id);
             return new HashMap<>();
         });
     }
 
-private static class ResponseEmployer extends com.myproject.employer.common.response.ApiResponse<EmployerDtoOut>{
+    private static class ResponseSeeker extends com.myproject.employer.common.response.ApiResponse<SeekerDtoOut>{
 
+    }
+    private static class ResponsePageSeeker extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<SeekerDtoOut>>{
+
+    }
 }
-private static class ResponsePageEmployer extends com.myproject.employer.common.response.ApiResponse<PageDtoOut<EmployerDtoOut>>{
-
-}
-
-}
-
-
-
-
